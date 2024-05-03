@@ -18,7 +18,7 @@ func (s *AppServer) Start() {
 	assert.Ok(err, "failed to start server")
 }
 
-func NewServer(router core.Router, config core.Configuration) *AppServer {
+func NewAppServer(router core.Router, config core.Configuration) *AppServer {
 	assert.NotNil(router, "router was nil")
 	assert.NotNil(config, "config was nil")
 

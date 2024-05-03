@@ -4,12 +4,7 @@ import (
 	"net/http"
 
 	"github.com/skaisanlahti/message-board/internal/core"
-	"github.com/skaisanlahti/message-board/internal/view"
 )
-
-func Setup(router core.Router, config core.Configuration) {
-	router.Handle("GET /", homePage)
-}
 
 const (
 	viewHome         = "home"
@@ -20,11 +15,24 @@ type homePageData struct {
 	Greeting string
 }
 
-func homePage(response http.ResponseWriter, request *http.Request) {
+type controller struct {
+	core.Renderer
+}
+
+func (c *controller) homePage(response http.ResponseWriter, request *http.Request) {
 	data := homePageData{
 		Greeting: "Home page",
 	}
-	html := view.Render(viewHome, data)
+	html := c.Render(viewHome, data)
 	response.WriteHeader(http.StatusOK)
 	response.Write(html)
+}
+
+func newController(r core.Renderer) *controller {
+	return &controller{r}
+}
+
+func Setup(router core.Router, config core.Configuration, renderer core.Renderer) {
+	controller := newController(renderer)
+	router.Handle("GET /", controller.homePage)
 }

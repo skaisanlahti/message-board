@@ -22,3 +22,7 @@ type Router interface {
 type Storage interface {
 	Database() *sql.DB
 }
+
+type Renderer interface {
+	Render(name string, data any) []byte
+}
