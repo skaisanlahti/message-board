@@ -3,11 +3,12 @@ package home
 import (
 	"net/http"
 
+	"github.com/skaisanlahti/message-board/internal/core"
 	"github.com/skaisanlahti/message-board/internal/view"
 )
 
-func SetupRoutes(router *http.ServeMux) {
-	router.HandleFunc("GET /", homePage)
+func Setup(router core.Router, config core.Configuration) {
+	router.Handle("GET /", homePage)
 }
 
 const (

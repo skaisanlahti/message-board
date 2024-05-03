@@ -1,23 +1,25 @@
 package app
 
 import (
-	"log"
-	"net/http"
-
+	"github.com/skaisanlahti/message-board/internal/assert"
+	"github.com/skaisanlahti/message-board/internal/config"
+	"github.com/skaisanlahti/message-board/internal/core"
 	"github.com/skaisanlahti/message-board/internal/home"
 )
 
 func Start() {
-	router := http.NewServeMux()
-	home.SetupRoutes(router)
-	server := &http.Server{
-		Addr:    ":8080",
-		Handler: router,
-	}
+	config := config.Read("appsettings.json")
+	router := NewAppRouter()
 
-	log.Println("web server started on port 8080")
-	err := server.ListenAndServe()
-	if err != nil {
-		panic(err)
-	}
+	setupModules(router, config)
+
+	server := NewServer(router, config)
+	server.Start()
+}
+
+func setupModules(router core.Router, config core.Configuration) {
+	assert.NotNil(router, "router was nil")
+	assert.NotNil(config, "config was nil")
+
+	home.Setup(router, config)
 }
