@@ -44,7 +44,7 @@ func Run(
 
 	// start server
 	go func() {
-		fmt.Fprintf(stdout, "server listening to %s", configuration.ServerAddress)
+		fmt.Fprintf(stdout, "server listening to %s\n", configuration.ServerAddress)
 		err = httpServer.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
 			fmt.Fprintf(stderr, "error listening and serving %s\n", err)

@@ -5,18 +5,23 @@ import (
 	"os"
 )
 
-type configuration struct {
-	ServerAddress   string `json:"serverAddress"`
-	DatabaseAddress string `json:"databaseAddress"`
+type Configuration struct {
+	ServerAddress       string `json:"serverAddress"`
+	DatabaseAddress     string `json:"databaseAddress"`
+	MigrationsDirectory string `json:"migrationsDirectory"`
 }
 
-func Read(filename string) (configuration, error) {
-	var config configuration
-	bytes, err := os.ReadFile(filename)
+func Read(path string) (Configuration, error) {
+	var config Configuration
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return config, err
 	}
 
 	err = json.Unmarshal(bytes, &config)
+	if err != nil {
+		return config, err
+	}
+
 	return config, nil
 }

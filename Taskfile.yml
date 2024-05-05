@@ -4,4 +4,19 @@ tasks:
   dev:
     cmds:
       - go run cmd/server/main.go
-    silent: true
+
+  db-up:
+    cmds:
+      - docker compose up -d
+
+  db-down:
+    cmds:
+      - docker compose down
+
+  db-update:
+    cmds:
+      - go run cmd/migrate/main.go -cmd up
+
+  db-clear:
+    cmds:
+      - go run cmd/migrate/main.go -cmd down

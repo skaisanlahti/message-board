@@ -2,33 +2,24 @@ package home
 
 import (
 	"bytes"
-	"context"
 	"database/sql"
 	"embed"
-	"fmt"
+	"html/template"
 	"net/http"
-	"text/template"
 
 	"github.com/skaisanlahti/message-board/internal/assert"
-	"github.com/skaisanlahti/message-board/internal/templ"
 )
 
 //go:embed html/*.html
-var html embed.FS
+var htmlFiles embed.FS
 
 func HomePage(database *sql.DB) http.Handler {
-	templates := templ.ParseFS(html, "html/*.html")
+	templates, err := template.ParseFS(htmlFiles, "html/*.html")
+	assert.Ok(err, "failed to parse home templates")
 
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		username, err := getUserName(database, request.Context(), "1234")
-		if err != nil {
-			response.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		greeting := fmt.Sprintf("Hello %s", username)
-		data := HomePageData{
-			Greeting: greeting,
+		data := homePageData{
+			Greeting: "hello world",
 		}
 
 		html := renderHomePage(templates, data)
@@ -37,19 +28,11 @@ func HomePage(database *sql.DB) http.Handler {
 	})
 }
 
-func getUserName(database *sql.DB, ctx context.Context, id string) (string, error) {
-	query := `SELECT name FROM users WHERE id = ?`
-	row := database.QueryRowContext(ctx, query, id)
-	var name string
-	err := row.Scan(&name)
-	return name, err
-}
-
 type homePageData struct {
 	Greeting string
 }
 
-func renderHomePage(templates *template.Template, data HomePageData) []byte {
+func renderHomePage(templates *template.Template, data homePageData) []byte {
 	var buffer bytes.Buffer
 	err := templates.ExecuteTemplate(&buffer, "home", data)
 	assert.Ok(err, "failed to render homepage")
