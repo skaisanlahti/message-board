@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,6 +26,7 @@ func Run(
 	defer cancel()
 
 	// initialize and build services
+	logger := slog.New(slog.NewJSONHandler(stderr, nil))
 	configuration, err := config.Read("appsettings.json")
 	if err != nil {
 		return err
@@ -36,7 +38,7 @@ func Run(
 	}
 
 	// build app and routes
-	app := NewApp(database)
+	app := NewApp(database, stdout)
 	httpServer := &http.Server{
 		Addr:    configuration.ServerAddress,
 		Handler: app,
@@ -47,7 +49,10 @@ func Run(
 		fmt.Fprintf(stdout, "server listening to %s\n", configuration.ServerAddress)
 		err = httpServer.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
-			fmt.Fprintf(stderr, "error listening and serving %s\n", err)
+			logger.Error(
+				"error listening and serving",
+				slog.String("error", err.Error()),
+			)
 		}
 	}()
 
@@ -64,7 +69,10 @@ func Run(
 		defer cancel()
 		err := httpServer.Shutdown(shutdownCtx)
 		if err != nil {
-			fmt.Fprintf(stderr, "error shutting down http server: %s\n", err)
+			logger.Error(
+				"error shutting down http server",
+				slog.String("error", err.Error()),
+			)
 		}
 
 	}()
