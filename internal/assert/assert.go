@@ -14,12 +14,6 @@ func True(condition bool, message string) {
 	}
 }
 
-func Nil(object interface{}, message string) {
-	if object != nil {
-		log.Fatal(message)
-	}
-}
-
 func NotNil(object interface{}, message string) {
 	if object == nil {
 		log.Fatal(message)

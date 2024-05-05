@@ -1,38 +1,57 @@
 package home
 
 import (
+	"bytes"
+	"context"
+	"database/sql"
+	"embed"
+	"fmt"
 	"net/http"
+	"text/template"
 
-	"github.com/skaisanlahti/message-board/internal/core"
+	"github.com/skaisanlahti/message-board/internal/assert"
+	"github.com/skaisanlahti/message-board/internal/templ"
 )
 
-const (
-	viewHome         = "home"
-	viewHomeGreeting = "home.greeting"
-)
+//go:embed html/*.html
+var html embed.FS
+
+func HomePage(database *sql.DB) http.Handler {
+	templates := templ.ParseFS(html, "html/*.html")
+
+	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
+		username, err := getUserName(database, request.Context(), "1234")
+		if err != nil {
+			response.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		greeting := fmt.Sprintf("Hello %s", username)
+		data := HomePageData{
+			Greeting: greeting,
+		}
+
+		html := renderHomePage(templates, data)
+		response.WriteHeader(http.StatusOK)
+		response.Write(html)
+	})
+}
+
+func getUserName(database *sql.DB, ctx context.Context, id string) (string, error) {
+	query := `SELECT name FROM users WHERE id = ?`
+	row := database.QueryRowContext(ctx, query, id)
+	var name string
+	err := row.Scan(&name)
+	return name, err
+}
 
 type homePageData struct {
 	Greeting string
 }
 
-type controller struct {
-	core.Renderer
-}
-
-func (c *controller) homePage(response http.ResponseWriter, request *http.Request) {
-	data := homePageData{
-		Greeting: "Home page",
-	}
-	html := c.Render(viewHome, data)
-	response.WriteHeader(http.StatusOK)
-	response.Write(html)
-}
-
-func newController(r core.Renderer) *controller {
-	return &controller{r}
-}
-
-func Setup(router core.Router, config core.Configuration, renderer core.Renderer) {
-	controller := newController(renderer)
-	router.Handle("GET /", controller.homePage)
+func renderHomePage(templates *template.Template, data HomePageData) []byte {
+	var buffer bytes.Buffer
+	err := templates.ExecuteTemplate(&buffer, "home", data)
+	assert.Ok(err, "failed to render homepage")
+	return buffer.Bytes()
 }
