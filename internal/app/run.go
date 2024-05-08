@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/skaisanlahti/message-board/internal/assert"
 	"github.com/skaisanlahti/message-board/internal/config"
 )
 
@@ -20,38 +20,47 @@ func Run(
 	ctx context.Context,
 	args []string,
 	getEnv func(string) string,
-	stdout, stderr io.Writer,
+	stderr io.Writer,
 ) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	// initialize and build services
-	logger := slog.New(slog.NewJSONHandler(stderr, nil))
 	configuration, err := config.Read("appsettings.json")
 	if err != nil {
 		return err
 	}
 
+	logger := slog.New(slog.NewJSONHandler(stderr, nil))
+	assert.SetLogger(logger)
+
 	database, err := sql.Open("pgx", configuration.DatabaseAddress)
 	if err != nil {
 		return err
 	}
+	defer database.Close()
 
-	// build app and routes
-	app := NewApp(database, stdout)
+	appHandler := NewApp(database, logger)
 	httpServer := &http.Server{
 		Addr:    configuration.ServerAddress,
-		Handler: app,
+		Handler: appHandler,
 	}
 
-	// start server
 	go func() {
-		fmt.Fprintf(stdout, "server listening to %s\n", configuration.ServerAddress)
+		logger.Info(
+			"server started",
+			slog.String("address", configuration.ServerAddress),
+		)
+
 		err = httpServer.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
+		if err == http.ErrServerClosed {
+			logger.Info("server closed")
+			return
+		}
+
+		if err != nil {
 			logger.Error(
 				"error listening and serving",
-				slog.String("error", err.Error()),
+				slog.Any("error", err),
 			)
 		}
 	}()
@@ -59,22 +68,21 @@ func Run(
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(1)
 
-	// stop server
 	go func() {
 		defer waitGroup.Done()
 		<-ctx.Done()
 
 		shutdownCtx := context.Background()
-		shutdownCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
-		defer cancel()
+		shutdownCtx, cancelShutdown := context.WithTimeout(ctx, 10*time.Second)
+		defer cancelShutdown()
+
 		err := httpServer.Shutdown(shutdownCtx)
 		if err != nil {
 			logger.Error(
 				"error shutting down http server",
-				slog.String("error", err.Error()),
+				slog.Any("error", err),
 			)
 		}
-
 	}()
 
 	waitGroup.Wait()

@@ -2,21 +2,31 @@ version: '3'
 
 tasks:
   dev:
+    desc: build and run app
     cmds:
       - go run cmd/server/main.go
 
-  db-up:
+  build:
+    desc: build and run app
+    cmds:
+      - go build -o bin/server cmd/server/main.go
+
+  db-start:
+    desc: start database container
     cmds:
       - docker compose up -d
 
-  db-down:
+  db-stop:
+    desc: stop database container
     cmds:
       - docker compose down
 
-  db-update:
+  db-up:
+    desc: migrate database up
     cmds:
-      - go run cmd/migrate/main.go -cmd up
+      - go run cmd/migrate/main.go -m up
 
-  db-clear:
+  db-down:
+    desc: migrate database down
     cmds:
-      - go run cmd/migrate/main.go -cmd down
+      - go run cmd/migrate/main.go -m down

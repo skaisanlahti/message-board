@@ -13,7 +13,7 @@ BEGIN
     );
 
     CREATE UNIQUE INDEX IF NOT EXISTS index_users_name ON users(name);
-    
+
     INSERT INTO migrations (version, name) VALUES (1, 'add_users_table');
 END $$;
 COMMIT;

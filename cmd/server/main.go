@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
-	err := app.Run(ctx, os.Args, os.Getenv, os.Stdout, os.Stderr)
+	runCtx := context.Background()
+	err := app.Run(runCtx, os.Args, os.Getenv, os.Stderr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)

@@ -11,6 +11,11 @@ import (
 	"github.com/skaisanlahti/message-board/internal/config"
 )
 
+const (
+	MigrateUp   = "up"
+	MigrateDown = "down"
+)
+
 func RunMigrations(configuration config.Configuration, stdout io.Writer, database *sql.DB, direction string) error {
 	directory := configuration.MigrationsDirectory
 	if !strings.HasSuffix(directory, "/") {
@@ -24,7 +29,7 @@ func RunMigrations(configuration config.Configuration, stdout io.Writer, databas
 	}
 
 	sort.Slice(files, func(i, j int) bool {
-		if direction == "up" {
+		if direction == MigrateUp {
 			return files[i].Name() < files[j].Name()
 		}
 

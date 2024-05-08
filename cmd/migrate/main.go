@@ -28,10 +28,10 @@ func run(ctx context.Context, stdout io.Writer) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	direction := flag.String("cmd", "", "")
+	direction := flag.String("m", "", "")
 	flag.Parse()
-	if *direction == "" {
-		return errors.New("direction argument was not provided")
+	if *direction != postgres.MigrateUp && *direction != postgres.MigrateDown {
+		return errors.New("invalid migration direction, must be either up or down")
 	}
 
 	configuration, err := config.Read("appsettings.json")
