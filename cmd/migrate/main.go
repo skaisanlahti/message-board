@@ -34,7 +34,7 @@ func run(ctx context.Context, stdout io.Writer) error {
 		return errors.New("invalid migration direction, must be either up or down")
 	}
 
-	configuration, err := config.Read("appsettings.json")
+	configuration, err := config.Read("config/appsettings.json")
 	if err != nil {
 		return err
 	}

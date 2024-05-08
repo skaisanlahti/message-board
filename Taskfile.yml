@@ -1,32 +1,38 @@
 version: '3'
 
 tasks:
-  dev:
+  run:
+    aliases: [r]
     desc: build and run app
     cmds:
       - go run cmd/server/main.go
 
   build:
-    desc: build and run app
+    aliases: [b]
+    desc: build executable
     cmds:
       - go build -o bin/server cmd/server/main.go
 
-  db-start:
+  compose-up:
+    aliases: [cu]
     desc: start database container
     cmds:
-      - docker compose up -d
+      - docker compose -f docker/dev.yaml up -d
 
-  db-stop:
+  compose-down:
+    aliases: [cd]
     desc: stop database container
     cmds:
-      - docker compose down
+      - docker compose -f docker/dev.yaml down
 
   db-up:
+    aliases: [up]
     desc: migrate database up
     cmds:
       - go run cmd/migrate/main.go -m up
 
   db-down:
+    aliases: [down]
     desc: migrate database down
     cmds:
       - go run cmd/migrate/main.go -m down

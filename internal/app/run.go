@@ -25,12 +25,12 @@ func Run(
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	configuration, err := config.Read("appsettings.json")
+	configuration, err := config.Read("config/appsettings.json")
 	if err != nil {
 		return err
 	}
 
-	logger := slog.New(slog.NewJSONHandler(stderr, nil))
+	logger := slog.New(slog.NewTextHandler(stderr, nil))
 	assert.SetLogger(logger)
 
 	database, err := sql.Open("pgx", configuration.DatabaseAddress)
@@ -40,7 +40,7 @@ func Run(
 	defer database.Close()
 
 	appHandler := NewApp(database, logger)
-	httpServer := &http.Server{
+	httpServer := http.Server{
 		Addr:    configuration.ServerAddress,
 		Handler: appHandler,
 	}
@@ -48,7 +48,7 @@ func Run(
 	go func() {
 		logger.Info(
 			"server started",
-			slog.String("address", configuration.ServerAddress),
+			slog.String("address", httpServer.Addr),
 		)
 
 		err = httpServer.ListenAndServe()
