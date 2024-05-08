@@ -111,6 +111,7 @@ func Decode(hashedPassword string) ([]byte, []byte, PasswordOptions, bool) {
 		Memory:  uint32(memory),
 		Threads: uint8(threads),
 		KeyLen:  uint32(keyLen),
+		SaltLen: uint32(len(salt)),
 	}
 
 	return hash, salt, options, true

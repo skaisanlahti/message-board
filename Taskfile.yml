@@ -1,11 +1,26 @@
 version: '3'
 
 tasks:
+  default:
+    silent: true
+    cmds:
+      - task -l
+
   run:
     aliases: [r]
     desc: build and run app
     cmds:
       - go run cmd/server/main.go
+    sources:
+      - ./**/*.go
+
+  test:
+    aliases: [t]
+    desc: run tests
+    cmds:
+      - go test ./... -v
+    sources:
+      - ./**/*.go
 
   build:
     aliases: [b]
@@ -15,24 +30,24 @@ tasks:
 
   compose-up:
     aliases: [cu]
-    desc: start database container
+    desc: docker compose up
     cmds:
       - docker compose -f docker/dev.yaml up -d
 
   compose-down:
     aliases: [cd]
-    desc: stop database container
+    desc: docker compose down
     cmds:
       - docker compose -f docker/dev.yaml down
 
-  db-up:
-    aliases: [up]
+  migrate-up:
+    aliases: [mu]
     desc: migrate database up
     cmds:
       - go run cmd/migrate/main.go -m up
 
-  db-down:
-    aliases: [down]
+  migrate-down:
+    aliases: [md]
     desc: migrate database down
     cmds:
       - go run cmd/migrate/main.go -m down

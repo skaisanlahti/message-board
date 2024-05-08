@@ -34,7 +34,7 @@ func run(ctx context.Context, stdout io.Writer) error {
 		return errors.New("invalid migration direction, must be either up or down")
 	}
 
-	configuration, err := config.Read("config/appsettings.json")
+	configuration, err := config.Read("config/app.json")
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func run(ctx context.Context, stdout io.Writer) error {
 	}
 	defer database.Close()
 
-	err = postgres.RunMigrations(configuration, stdout, database, *direction)
+	err = postgres.Migrate(configuration, stdout, database, *direction)
 	if err != nil {
 		return err
 	}

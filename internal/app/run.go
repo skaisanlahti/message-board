@@ -25,7 +25,7 @@ func Run(
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	configuration, err := config.Read("config/appsettings.json")
+	configuration, err := config.Read("config/app.json")
 	if err != nil {
 		return err
 	}

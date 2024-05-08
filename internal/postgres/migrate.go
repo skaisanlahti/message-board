@@ -16,7 +16,7 @@ const (
 	MigrateDown = "down"
 )
 
-func RunMigrations(configuration config.Configuration, stdout io.Writer, database *sql.DB, direction string) error {
+func Migrate(configuration config.Configuration, stdout io.Writer, database *sql.DB, direction string) error {
 	directory := configuration.MigrationsDirectory
 	if !strings.HasSuffix(directory, "/") {
 		directory += "/"
