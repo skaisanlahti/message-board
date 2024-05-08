@@ -1,4 +1,4 @@
-package home
+package user
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"embed"
 	"html/template"
 	"net/http"
+	"time"
 
 	"github.com/skaisanlahti/message-board/internal/assert"
 )
@@ -13,26 +14,29 @@ import (
 //go:embed html/*.html
 var htmlFiles embed.FS
 
-func HomePage(database *sql.DB) http.Handler {
+func RegisterPage(database *sql.DB) http.Handler {
 	templates, err := template.ParseFS(htmlFiles, "html/*.html")
-	assert.Ok(err, "failed to parse home templates")
+	assert.Ok(err, "failed to parse register templates")
 
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		data := homePageData{
-			Greeting: "hello world",
+		data := pageData{
+			Key: time.Now().UnixMilli(),
 		}
 
-		html := renderHomePage(templates, data)
+		html := renderPage(templates, data)
 		response.WriteHeader(http.StatusOK)
 		response.Write(html)
 	})
 }
 
-type homePageData struct {
-	Greeting string
+type pageData struct {
+	Key      int64
+	Username string
+	Password string
+	Error    string
 }
 
-func renderHomePage(templates *template.Template, data homePageData) []byte {
+func renderPage(templates *template.Template, data pageData) []byte {
 	var buffer bytes.Buffer
 	err := templates.ExecuteTemplate(&buffer, "page", data)
 	assert.Ok(err, "failed to render homepage")

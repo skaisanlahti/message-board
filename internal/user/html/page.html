@@ -1,19 +1,19 @@
-{{define "home"}}
+{{define "page"}}
 <!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Home</title>
+        <title>Register</title>
     </head>
     <body>
-        <main>{{template "home.greeting" .}}</main>
+        <main>{{template "form" .}}</main>
     </body>
 </html>
 {{end}}
 
 <!--  -->
 
-{{define "home.greeting"}}
+{{define "form"}}
 <h1>{{.Greeting}}</h1>
 {{end}}

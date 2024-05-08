@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/skaisanlahti/message-board/internal/home"
+	"github.com/skaisanlahti/message-board/internal/user"
 )
 
 func NewApp(database *sql.DB, logger *slog.Logger) http.Handler {
@@ -26,6 +27,7 @@ func NewApp(database *sql.DB, logger *slog.Logger) http.Handler {
 
 func addRoutes(mux *http.ServeMux, database *sql.DB) {
 	mux.Handle("GET /", home.HomePage(database))
+	mux.Handle("GET /sign-up", user.RegisterPage(database))
 }
 
 func logRequest(logger *slog.Logger) Middleware {
