@@ -13,6 +13,7 @@
     "htmx.org": "^1.9.12"
   },
   "devDependencies": {
-    "esbuild": "^0.21.1"
+    "esbuild": "^0.21.1",
+    "prettier-plugin-go-template": "^0.0.15"
   }
 }

@@ -15,6 +15,9 @@ importers:
       esbuild:
         specifier: ^0.21.1
         version: 0.21.1
+      prettier-plugin-go-template:
+        specifier: ^0.0.15
+        version: 0.0.15(prettier@3.2.5)
 
 packages:
 
@@ -164,6 +167,21 @@ packages:
   htmx.org@1.9.12:
     resolution: {integrity: sha512-VZAohXyF7xPGS52IM8d1T1283y+X4D+Owf3qY1NZ9RuBypyu9l8cGsxUMAG5fEAb/DhT7rDoJ9Hpu5/HxFD3cw==}
 
+  prettier-plugin-go-template@0.0.15:
+    resolution: {integrity: sha512-WqU92E1NokWYNZ9mLE6ijoRg6LtIGdLMePt2C7UBDjXeDH9okcRI3zRqtnWR4s5AloiqyvZ66jNBAa9tmRY5EQ==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      prettier: ^3.0.0
+
+  prettier@3.2.5:
+    resolution: {integrity: sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==}
+    engines: {node: '>=14'}
+    hasBin: true
+
+  ulid@2.3.0:
+    resolution: {integrity: sha512-keqHubrlpvT6G2wH0OEfSW4mquYRcbe/J8NMmveoQOjUqmo+hXtO+ORCpWhdbZ7k72UtY61BL7haGxW6enBnjw==}
+    hasBin: true
+
 snapshots:
 
   '@esbuild/aix-ppc64@0.21.1':
@@ -262,3 +280,12 @@ snapshots:
       '@esbuild/win32-x64': 0.21.1
 
   htmx.org@1.9.12: {}
+
+  prettier-plugin-go-template@0.0.15(prettier@3.2.5):
+    dependencies:
+      prettier: 3.2.5
+      ulid: 2.3.0
+
+  prettier@3.2.5: {}
+
+  ulid@2.3.0: {}

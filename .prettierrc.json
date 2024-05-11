@@ -1,5 +1,5 @@
 {
     "tabWidth": 4,
     "printWidth": 120,
-    "htmlWhitespaceSensitivity": "strict"
+    "plugins": ["prettier-plugin-go-template"]
 }

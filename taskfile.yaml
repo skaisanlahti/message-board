@@ -53,7 +53,6 @@ tasks:
     generates:
       - bin/application
 
-
   compose-up:
     aliases: [cu]
     desc: docker compose up
