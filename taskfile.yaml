@@ -23,6 +23,12 @@ tasks:
     sources:
       - ./**/*.go
 
+  build:
+    aliases: [b]
+    desc: build binary and web assets
+    cmds:
+      - task build-web
+      - task build-go
 
   build-web:
     aliases: [bw]
@@ -30,12 +36,23 @@ tasks:
     cmds:
       - pnpm exec esbuild application/web/ts/main.ts --bundle --outfile=application/web/static/main.js --target=chrome58,firefox57,safari11,edge16
       - pnpm exec esbuild --bundle application/web/css/main.css --outfile=application/web/static/main.css
+    sources:
+      - ./**/*.ts
+      - ./**/*.css
+    generates:
+      - application/web/static/main.js
+      - application/web/static/main.css
 
   build-go:
     aliases: [bg]
     desc: build executable
     cmds:
       - go build -o bin/application application/main.go
+    sources:
+      - ./**/*.go
+    generates:
+      - bin/application
+
 
   compose-up:
     aliases: [cu]
