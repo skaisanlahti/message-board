@@ -1,0 +1,4 @@
+{
+    "serverAddress": "localhost:8080",
+    "databaseAddress": "postgres://dbuser:dbpassword@localhost:5432/message-board-db?sslmode=disable"
+}

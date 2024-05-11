@@ -1,0 +1,4 @@
+{
+    "databaseAddress": "postgres://dbuser:dbpassword@localhost:5432/message-board-db?sslmode=disable",
+    "migrationsDirectory": "postgres"
+}

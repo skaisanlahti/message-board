@@ -1,0 +1,21 @@
+version: "3"
+
+name: "message-board"
+
+volumes:
+  postgres:
+
+services:
+  database:
+    container_name: database
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: dbpassword
+      POSTGRES_DB: message-board-db
+    volumes:
+      - postgres:/var/lib/postgresql/data/
+
+

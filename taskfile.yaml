@@ -3,14 +3,15 @@ version: '3'
 tasks:
   default:
     silent: true
+    desc: list available tasks
     cmds:
-      - task -l
+      - task -a
 
   run:
     aliases: [r]
     desc: build and run app
     cmds:
-      - go run cmd/server/main.go
+      - go run application/main.go --settings application/settings.json
     sources:
       - ./**/*.go
 
@@ -32,13 +33,13 @@ tasks:
     aliases: [cu]
     desc: docker compose up
     cmds:
-      - docker compose -f docker/dev.yaml up -d
+      - docker compose -f etc/docker-compose.dev.yaml up -d
 
   compose-down:
     aliases: [cd]
     desc: docker compose down
     cmds:
-      - docker compose -f docker/dev.yaml down
+      - docker compose -f etc/docker-compose.dev.yaml down
 
   migrate-up:
     aliases: [mu]
