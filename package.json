@@ -11,5 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "htmx.org": "^1.9.12"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.1"
   }
 }

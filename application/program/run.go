@@ -14,6 +14,7 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/skaisanlahti/message-board/application/web"
 	"github.com/skaisanlahti/message-board/library/assert"
 	"github.com/skaisanlahti/message-board/library/file"
 )
@@ -41,7 +42,6 @@ func Run(
 	if err != nil {
 		return err
 	}
-
 	logger := slog.New(slog.NewTextHandler(stderr, nil))
 	assert.SetLogger(logger)
 	logger.Info(
@@ -49,13 +49,14 @@ func Run(
 		slog.String("file", *settingsFilePath),
 	)
 
+	templates := web.ParseTemplates()
 	database, err := sql.Open("pgx", config.DatabaseAddress)
 	if err != nil {
 		return err
 	}
 	defer database.Close()
 
-	handler := newHandler(database, logger)
+	handler := newHandler(templates, database, logger)
 	httpServer := http.Server{
 		Addr:    config.ServerAddress,
 		Handler: handler,

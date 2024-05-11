@@ -16,6 +16,11 @@ import (
 	"github.com/skaisanlahti/message-board/library/file"
 )
 
+type appSettings struct {
+	DatabaseAddress     string
+	MigrationsDirectory string
+}
+
 const (
 	MigrateUp   = "up"
 	MigrateDown = "down"
@@ -30,22 +35,23 @@ func main() {
 	}
 }
 
-type appSettings struct {
-	DatabaseAddress     string
-	MigrationsDirectory string
-}
-
 func run(ctx context.Context, stdout io.Writer) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	direction := flag.String("m", "", "")
+	settingsFilePath := flag.String("settings", "", "application settings")
+	direction := flag.String("migrate", "", "migration direction")
 	flag.Parse()
+
+	if *settingsFilePath == "" {
+		return errors.New("settings not provided")
+	}
+
 	if *direction != MigrateUp && *direction != MigrateDown {
 		return errors.New("invalid migration direction, must be either up or down")
 	}
 
-	config, err := file.ReadJSON[appSettings]("appsettings.dev.json")
+	config, err := file.ReadJSON[appSettings](*settingsFilePath)
 	if err != nil {
 		return err
 	}

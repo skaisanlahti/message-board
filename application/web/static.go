@@ -1,11 +1,26 @@
 package web
 
-import "net/http"
+import (
+	"embed"
+	"html/template"
+	"net/http"
 
-func ServeStaticFiles() {
-	handler := http.FileServerFS()
+	"github.com/skaisanlahti/message-board/library/assert"
+)
+
+//go:embed static/*
+var staticFiles embed.FS
+
+//go:embed html/*.html
+var templateFiles embed.FS
+
+func ServeStaticFiles() http.Handler {
+	handler := http.FileServerFS(staticFiles)
+	return handler
 }
 
-func ParseTemplates() {
-
+func ParseTemplates() *template.Template {
+	templates, err := template.ParseFS(templateFiles, "html/*.html")
+	assert.Ok(err, "failed to parse html templates")
+	return templates
 }

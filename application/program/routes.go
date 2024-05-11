@@ -2,25 +2,29 @@ package program
 
 import (
 	"database/sql"
+	"html/template"
 	"log/slog"
 	"net/http"
 
 	"github.com/skaisanlahti/message-board/application/command"
 	"github.com/skaisanlahti/message-board/application/query"
+	"github.com/skaisanlahti/message-board/application/web"
 )
 
-func newHandler(_ *sql.DB, logger *slog.Logger) http.Handler {
-	router := http.NewServeMux()
-	router.Handle("GET /", query.HomePage())
-	router.Handle("GET /sign-up", query.SignUpPage())
-	router.Handle("GET /sign-in", query.SignInPage())
-	router.Handle("GET /sign-out", query.SignOutPage())
-	router.Handle("GET /profile", query.SignOutPage())
+func newHandler(templates *template.Template, _ *sql.DB, logger *slog.Logger) http.Handler {
+	mux := http.NewServeMux()
+	mux.Handle("GET /static/", web.ServeStaticFiles())
 
-	router.Handle("POST /sign-up", command.SignUp())
-	router.Handle("POST /sign-in", command.SignIn())
-	router.Handle("DELETE /sign-out", command.SignOut())
+	mux.Handle("GET /", query.HomePage(templates, logger))
+	mux.Handle("GET /sign-up", query.SignUpPage())
+	mux.Handle("GET /sign-in", query.SignInPage())
+	mux.Handle("GET /sign-out", query.SignOutPage())
+	mux.Handle("GET /profile", query.SignOutPage())
 
-	handler := logRequest(router, logger)
+	mux.Handle("POST /sign-up", command.SignUp())
+	mux.Handle("POST /sign-in", command.SignIn())
+	mux.Handle("DELETE /sign-out", command.SignOut())
+
+	handler := logRequest(mux, logger)
 	return handler
 }

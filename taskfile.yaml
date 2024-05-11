@@ -23,32 +23,40 @@ tasks:
     sources:
       - ./**/*.go
 
-  build:
-    aliases: [b]
+
+  build-web:
+    aliases: [bw]
+    desc: build web assets
+    cmds:
+      - pnpm exec esbuild application/web/ts/main.ts --bundle --outfile=application/web/static/main.js --target=chrome58,firefox57,safari11,edge16
+      - pnpm exec esbuild --bundle application/web/css/main.css --outfile=application/web/static/main.css
+
+  build-go:
+    aliases: [bg]
     desc: build executable
     cmds:
-      - go build -o bin/server cmd/server/main.go
+      - go build -o bin/application application/main.go
 
   compose-up:
     aliases: [cu]
     desc: docker compose up
     cmds:
-      - docker compose -f etc/docker-compose.dev.yaml up -d
+      - docker compose -f docker-compose.dev.yaml up -d
 
   compose-down:
     aliases: [cd]
     desc: docker compose down
     cmds:
-      - docker compose -f etc/docker-compose.dev.yaml down
+      - docker compose -f docker-compose.dev.yaml down
 
   migrate-up:
     aliases: [mu]
     desc: migrate database up
     cmds:
-      - go run cmd/migrate/main.go -m up
+      - go run postgres/main.go --settings postgres/settings.json --migrate up
 
   migrate-down:
     aliases: [md]
     desc: migrate database down
     cmds:
-      - go run cmd/migrate/main.go -m down
+      - go run postgres/main.go --settings postgres/settings.json --migrate down
