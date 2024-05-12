@@ -38,10 +38,11 @@ func Run(
 		return errors.New("no settings were provided")
 	}
 
-	config, err := file.ReadJSON[appSettings](*settingsFilePath)
+	settings, err := file.ReadJSON[appSettings](*settingsFilePath)
 	if err != nil {
 		return err
 	}
+
 	logger := slog.New(slog.NewTextHandler(stderr, nil))
 	assert.SetLogger(logger)
 	logger.Info(
@@ -50,15 +51,15 @@ func Run(
 	)
 
 	templates := web.ParseTemplates()
-	database, err := sql.Open("pgx", config.DatabaseAddress)
+	database, err := sql.Open("pgx", settings.DatabaseAddress)
 	if err != nil {
 		return err
 	}
 	defer database.Close()
 
-	handler := newHandler(templates, database, logger)
+	handler := newRouteHandler(templates, database, logger)
 	httpServer := http.Server{
-		Addr:    config.ServerAddress,
+		Addr:    settings.ServerAddress,
 		Handler: handler,
 	}
 

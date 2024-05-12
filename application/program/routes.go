@@ -11,8 +11,8 @@ import (
 	"github.com/skaisanlahti/message-board/application/web"
 )
 
-func newHandler(templates *template.Template, _ *sql.DB, logger *slog.Logger) http.Handler {
-	mux := http.NewServeMux()
+func newRouteHandler(templates *template.Template, _ *sql.DB, logger *slog.Logger) http.Handler {
+	var mux = http.NewServeMux()
 	mux.Handle("GET /static/", web.ServeStaticFiles())
 
 	mux.Handle("GET /", query.HomePage(templates, logger))
@@ -25,6 +25,7 @@ func newHandler(templates *template.Template, _ *sql.DB, logger *slog.Logger) ht
 	mux.Handle("POST /sign-in", command.SignIn())
 	mux.Handle("DELETE /sign-out", command.SignOut())
 
-	handler := logRequest(mux, logger)
+	var handler http.Handler = mux
+	handler = logRequest(handler, logger)
 	return handler
 }
