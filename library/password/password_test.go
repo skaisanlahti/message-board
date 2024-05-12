@@ -22,17 +22,17 @@ func TestPassword(t *testing.T) {
 		result := Hash(password, testOptions)
 		ok := Verify(result, password)
 		if !ok {
-			t.Error("Verify failed")
+			t.Error("verify failed")
 		}
 
 		_, _, options, ok := Decode(result)
 		if !ok {
-			t.Error("Decode failed")
+			t.Error("decode failed")
 		}
 
 		ok = CompareOptions(testOptions, options)
 		if !ok {
-			t.Error("CompareOptions failed")
+			t.Error("compare options failed")
 		}
 	}
 }
