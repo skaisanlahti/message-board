@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/skaisanlahti/message-board/library/assert"
+	"github.com/skaisanlahti/message-board/internal/assert"
 )
 
 //go:embed static/*

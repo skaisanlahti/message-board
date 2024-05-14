@@ -1,4 +1,4 @@
-package program
+package postgres
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/skaisanlahti/message-board/library/file"
+	"github.com/skaisanlahti/message-board/internal/file"
 )
 
 type appSettings struct {

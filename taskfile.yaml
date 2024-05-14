@@ -11,7 +11,7 @@ tasks:
     aliases: [r]
     desc: build and run app
     cmds:
-      - go run application/main.go --settings application/settings.json
+      - go run cmd/application/main.go --settings cmd/application/settings.json
     sources:
       - ./**/*.go
 
@@ -34,20 +34,20 @@ tasks:
     aliases: [bw]
     desc: build web assets
     cmds:
-      - pnpm exec esbuild application/web/ts/main.ts --bundle --outfile=application/web/static/main.js --target=chrome58,firefox57,safari11,edge16
-      - pnpm exec esbuild --bundle application/web/css/main.css --outfile=application/web/static/main.css
+      - pnpm exec esbuild internal/application/web/ts/main.ts --bundle --outfile=internal/application/web/static/main.js --target=chrome58,firefox57,safari11,edge16
+      - pnpm exec esbuild --bundle internal/application/web/css/main.css --outfile=internal/application/web/static/main.css
     sources:
       - ./**/*.ts
       - ./**/*.css
     generates:
-      - application/web/static/main.js
-      - application/web/static/main.css
+      - internal/application/web/static/main.js
+      - internal/application/web/static/main.css
 
   build-go:
     aliases: [bg]
     desc: build executable
     cmds:
-      - go build -o bin/application application/main.go
+      - go build -o bin/application cmd/application/main.go
     sources:
       - ./**/*.go
     generates:
@@ -69,10 +69,10 @@ tasks:
     aliases: [mu]
     desc: migrate database up
     cmds:
-      - go run postgres/main.go --settings postgres/settings.json --migrate up
+      - go run cmd/postgres/main.go --settings cmd/postgres/settings.json --migrate up
 
   migrate-down:
     aliases: [md]
     desc: migrate database down
     cmds:
-      - go run postgres/main.go --settings postgres/settings.json --migrate down
+      - go run cmd/postgres/main.go --settings cmd/postgres/settings.json --migrate down

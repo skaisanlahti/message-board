@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/skaisanlahti/message-board/application/program"
+	"github.com/skaisanlahti/message-board/internal/application"
 )
 
 func main() {
 	ctx := context.Background()
-	err := program.Run(ctx, os.Stderr)
+	err := application.Run(ctx, os.Stderr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "main error: %s\n", err)
 		os.Exit(1)

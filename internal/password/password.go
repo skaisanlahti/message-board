@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/skaisanlahti/message-board/library/assert"
+	"github.com/skaisanlahti/message-board/internal/assert"
 	"golang.org/x/crypto/argon2"
 )
 

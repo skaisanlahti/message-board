@@ -1,4 +1,4 @@
-package program
+package application
 
 import (
 	"context"
@@ -14,9 +14,9 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/skaisanlahti/message-board/application/web"
-	"github.com/skaisanlahti/message-board/library/assert"
-	"github.com/skaisanlahti/message-board/library/file"
+	"github.com/skaisanlahti/message-board/internal/application/web"
+	"github.com/skaisanlahti/message-board/internal/assert"
+	"github.com/skaisanlahti/message-board/internal/file"
 )
 
 type appSettings struct {

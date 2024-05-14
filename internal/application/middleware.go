@@ -1,4 +1,4 @@
-package program
+package application
 
 import (
 	"log/slog"
@@ -28,7 +28,7 @@ func logRequest(handler http.Handler, logger *slog.Logger) http.Handler {
 		handler.ServeHTTP(response, request)
 
 		durationMs := time.Since(start).Milliseconds()
-		logger.Debug(
+		logger.Info(
 			"request handled",
 			slog.String("method", method),
 			slog.String("url", url),
