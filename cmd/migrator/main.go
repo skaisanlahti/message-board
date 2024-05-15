@@ -6,12 +6,12 @@ import (
 	"os"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/skaisanlahti/message-board/internal/postgres"
+	"github.com/skaisanlahti/message-board/internal/migrator"
 )
 
 func main() {
 	ctx := context.Background()
-	err := postgres.Run(ctx, os.Stdout)
+	err := migrator.Run(ctx, os.Stdout)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)

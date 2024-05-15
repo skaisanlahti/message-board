@@ -1,4 +1,4 @@
-package application
+package app
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/skaisanlahti/message-board/internal/application/web"
+	"github.com/skaisanlahti/message-board/internal/app/web"
 	"github.com/skaisanlahti/message-board/internal/assert"
 	"github.com/skaisanlahti/message-board/internal/file"
 )

@@ -1,4 +1,4 @@
-package application
+package app
 
 import (
 	"database/sql"
@@ -6,9 +6,9 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/skaisanlahti/message-board/internal/application/command"
-	"github.com/skaisanlahti/message-board/internal/application/query"
-	"github.com/skaisanlahti/message-board/internal/application/web"
+	"github.com/skaisanlahti/message-board/internal/app/command"
+	"github.com/skaisanlahti/message-board/internal/app/query"
+	"github.com/skaisanlahti/message-board/internal/app/web"
 )
 
 func newRouteHandler(templates *template.Template, _ *sql.DB, logger *slog.Logger) http.Handler {
