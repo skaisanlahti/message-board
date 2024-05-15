@@ -25,7 +25,10 @@ func newRouteHandler(templates *template.Template, _ *sql.DB, logger *slog.Logge
 	mux.Handle("POST /sign-in", command.SignIn())
 	mux.Handle("DELETE /sign-out", command.SignOut())
 
-	var handler http.Handler = mux
-	handler = logRequest(handler, logger)
+	middleware := newMiddleware(
+		logRequest(logger),
+	)
+
+	handler := middleware(mux)
 	return handler
 }
