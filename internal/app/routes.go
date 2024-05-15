@@ -12,7 +12,7 @@ import (
 )
 
 func newRouteHandler(templates *template.Template, _ *sql.DB, logger *slog.Logger) http.Handler {
-	var mux = http.NewServeMux()
+	mux := http.NewServeMux()
 	mux.Handle("GET /static/", web.ServeStaticFiles())
 
 	mux.Handle("GET /", query.HomePage(templates, logger))
