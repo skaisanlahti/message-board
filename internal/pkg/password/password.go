@@ -8,11 +8,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/skaisanlahti/message-board/internal/assert"
 	"golang.org/x/crypto/argon2"
 )
 
-type PasswordOptions struct {
+type Options struct {
 	Time    uint32
 	Memory  uint32
 	Threads uint8
@@ -20,8 +19,27 @@ type PasswordOptions struct {
 	SaltLen uint32
 }
 
-func Hash(password string, options PasswordOptions) string {
-	salt := RandomBytes(options.SaltLen)
+var DefaultOptions = Options{
+	Time:    5,
+	Memory:  1024 * 7,
+	Threads: 1,
+	SaltLen: 32,
+	KeyLen:  64,
+}
+
+type Service struct {
+	options Options
+}
+
+func NewService(options Options) *Service {
+	return &Service{
+		options: options,
+	}
+}
+
+func (service *Service) Hash(password string) string {
+	options := service.options
+	salt := randomBytes(options.SaltLen)
 	hash := argon2.IDKey(
 		[]byte(password),
 		salt,
@@ -31,12 +49,11 @@ func Hash(password string, options PasswordOptions) string {
 		options.KeyLen,
 	)
 
-	hashedPassword := Encode(hash, salt, options)
-	return hashedPassword
+	return encode(hash, salt, options)
 }
 
-func Verify(hashedPassword, candidate string) bool {
-	hash, salt, options, ok := Decode(hashedPassword)
+func (service *Service) Verify(hashedPassword, candidate string) bool {
+	hash, salt, options, ok := decode(hashedPassword)
 	if !ok {
 		return false
 	}
@@ -50,11 +67,19 @@ func Verify(hashedPassword, candidate string) bool {
 		options.KeyLen,
 	)
 
-	ok = subtle.ConstantTimeCompare(hash, candidateHash) == 1
-	return ok
+	return subtle.ConstantTimeCompare(hash, candidateHash) == 1
 }
 
-func Encode(hash, salt []byte, options PasswordOptions) string {
+func (service *Service) CompareOptions(hashedPassword string) bool {
+	_, _, options, ok := decode(hashedPassword)
+	if !ok {
+		return false
+	}
+
+	return equals(options, service.options)
+}
+
+func encode(hash, salt []byte, options Options) string {
 	return fmt.Sprintf(
 		"%s$%s$%d$%d$%d$%d",
 		base64.StdEncoding.EncodeToString(hash),
@@ -66,9 +91,9 @@ func Encode(hash, salt []byte, options PasswordOptions) string {
 	)
 }
 
-func Decode(hashedPassword string) ([]byte, []byte, PasswordOptions, bool) {
+func decode(hashedPassword string) ([]byte, []byte, Options, bool) {
 	var hash, salt []byte
-	var options PasswordOptions
+	var options Options
 	var err error
 
 	parts := strings.Split(hashedPassword, "$")
@@ -106,7 +131,7 @@ func Decode(hashedPassword string) ([]byte, []byte, PasswordOptions, bool) {
 		return hash, salt, options, false
 	}
 
-	options = PasswordOptions{
+	options = Options{
 		Time:    uint32(time),
 		Memory:  uint32(memory),
 		Threads: uint8(threads),
@@ -117,7 +142,7 @@ func Decode(hashedPassword string) ([]byte, []byte, PasswordOptions, bool) {
 	return hash, salt, options, true
 }
 
-func CompareOptions(o1, o2 PasswordOptions) bool {
+func equals(o1, o2 Options) bool {
 	if o1.Time != o2.Time {
 		return false
 	}
@@ -141,9 +166,12 @@ func CompareOptions(o1, o2 PasswordOptions) bool {
 	return true
 }
 
-func RandomBytes(length uint32) []byte {
+func randomBytes(length uint32) []byte {
 	bytes := make([]byte, length)
 	_, err := rand.Read(bytes)
-	assert.Ok(err, "failed to create random bytes")
+	if err != nil {
+		panic(err)
+	}
+
 	return bytes
 }

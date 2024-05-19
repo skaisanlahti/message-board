@@ -2,7 +2,7 @@ package password
 
 import "testing"
 
-var testOptions = PasswordOptions{
+var testOptions = Options{
 	Time:    5,
 	Memory:  1024 * 7,
 	Threads: 1,
@@ -18,19 +18,16 @@ var testPasswords = []string{
 }
 
 func TestPassword(t *testing.T) {
+	service := NewService(testOptions)
+
 	for _, password := range testPasswords {
-		result := Hash(password, testOptions)
-		ok := Verify(result, password)
+		result := service.Hash(password)
+		ok := service.Verify(result, password)
 		if !ok {
 			t.Error("verify failed")
 		}
 
-		_, _, options, ok := Decode(result)
-		if !ok {
-			t.Error("decode failed")
-		}
-
-		ok = CompareOptions(testOptions, options)
+		ok = service.CompareOptions(result)
 		if !ok {
 			t.Error("compare options failed")
 		}

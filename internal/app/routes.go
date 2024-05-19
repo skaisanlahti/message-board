@@ -2,33 +2,74 @@ package app
 
 import (
 	"database/sql"
-	"html/template"
 	"log/slog"
 	"net/http"
 
-	"github.com/skaisanlahti/message-board/internal/app/command"
-	"github.com/skaisanlahti/message-board/internal/app/query"
+	"github.com/skaisanlahti/message-board/internal/app/home"
+	"github.com/skaisanlahti/message-board/internal/app/log"
+	"github.com/skaisanlahti/message-board/internal/app/user"
 	"github.com/skaisanlahti/message-board/internal/app/web"
+	"github.com/skaisanlahti/message-board/internal/pkg/middleware"
+	"github.com/skaisanlahti/message-board/internal/pkg/password"
+	"github.com/skaisanlahti/message-board/internal/pkg/session"
 )
 
-func newRouteHandler(templates *template.Template, _ *sql.DB, logger *slog.Logger) http.Handler {
+func newServer(
+	logger *slog.Logger,
+	database *sql.DB,
+	webService *web.Service,
+	passwordService *password.Service,
+	sessionService *session.Service,
+) http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("GET /static/", web.ServeStaticFiles())
 
-	mux.Handle("GET /", query.HomePage(templates, logger))
-	mux.Handle("GET /sign-up", query.SignUpPage())
-	mux.Handle("GET /sign-in", query.SignInPage())
-	mux.Handle("GET /sign-out", query.SignOutPage())
-	mux.Handle("GET /profile", query.SignOutPage())
-
-	mux.Handle("POST /sign-up", command.SignUp())
-	mux.Handle("POST /sign-in", command.SignIn())
-	mux.Handle("DELETE /sign-out", command.SignOut())
-
-	middleware := newMiddleware(
-		logRequest(logger),
+	private := middleware.New(
+		session.RequireUser(),
 	)
 
-	handler := middleware(mux)
+	mux.Handle("GET /", home.NewHomePageHandler(
+		webService,
+	))
+
+	mux.Handle("GET /register", user.NewRegisterPageHandler(
+		webService,
+	))
+	mux.Handle("POST /register", user.NewRegisterHandler(
+		logger,
+		database,
+		sessionService,
+		passwordService,
+		webService,
+	))
+
+	mux.Handle("GET /login", user.NewLoginPageHandler(
+		webService,
+	))
+	mux.Handle("POST /login", user.NewLoginHandler(
+		logger,
+		database,
+		sessionService,
+		passwordService,
+		webService,
+	))
+
+	mux.Handle("GET /logout", user.NewLogoutPageHandler(
+		webService,
+	))
+	mux.Handle("POST /logout", private(user.NewLogoutHandler(
+		sessionService,
+	)))
+
+	mux.Handle("GET /profile", private(user.NewProfilePageHandler(
+		webService,
+	)))
+
+	global := middleware.New(
+		log.LogRequestInfo(logger),
+		session.AddUserToContext(sessionService),
+	)
+
+	handler := global(mux)
 	return handler
 }

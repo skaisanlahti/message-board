@@ -9,7 +9,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/skaisanlahti/message-board/internal/file"
+	"github.com/skaisanlahti/message-board/internal/pkg/file"
 )
 
 type appSettings struct {

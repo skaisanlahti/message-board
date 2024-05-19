@@ -15,8 +15,10 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/skaisanlahti/message-board/internal/app/web"
-	"github.com/skaisanlahti/message-board/internal/assert"
-	"github.com/skaisanlahti/message-board/internal/file"
+	"github.com/skaisanlahti/message-board/internal/pkg/assert"
+	"github.com/skaisanlahti/message-board/internal/pkg/file"
+	"github.com/skaisanlahti/message-board/internal/pkg/password"
+	"github.com/skaisanlahti/message-board/internal/pkg/session"
 )
 
 type appSettings struct {
@@ -45,38 +47,66 @@ func Run(
 
 	logger := slog.New(slog.NewTextHandler(stderr, nil))
 	assert.SetLogger(logger)
-	logger.Info(
+	logger.InfoContext(
+		ctx,
 		"settings loaded",
 		slog.String("file", *settingsFilePath),
 	)
 
 	templates := web.ParseTemplates()
+	webService := web.NewService(logger, templates)
+
 	database, err := sql.Open("pgx", settings.DatabaseAddress)
 	if err != nil {
 		return err
 	}
 	defer database.Close()
 
-	handler := newRouteHandler(templates, database, logger)
+	sessionOptions := session.Options{
+		CookieName:      "sid",
+		SessionDuration: 1 * time.Hour,
+	}
+
+	sessionService := session.NewService(sessionOptions)
+	passwordOptions := password.Options{
+		Time:    5,
+		Memory:  1024 * 7,
+		Threads: 1,
+		SaltLen: 32,
+		KeyLen:  64,
+	}
+
+	passwordService := password.NewService(passwordOptions)
+
+	server := newServer(
+		logger,
+		database,
+		webService,
+		passwordService,
+		sessionService,
+	)
+
 	httpServer := http.Server{
 		Addr:    settings.ServerAddress,
-		Handler: handler,
+		Handler: server,
 	}
 
 	go func() {
-		logger.Info(
+		logger.InfoContext(
+			ctx,
 			"server started",
 			slog.String("address", httpServer.Addr),
 		)
 
 		err = httpServer.ListenAndServe()
 		if err == http.ErrServerClosed {
-			logger.Info("server closed")
+			logger.InfoContext(ctx, "server closed")
 			return
 		}
 
 		if err != nil {
-			logger.Error(
+			logger.ErrorContext(
+				ctx,
 				"error listening and serving",
 				slog.Any("error", err),
 			)
@@ -96,7 +126,8 @@ func Run(
 
 		err := httpServer.Shutdown(shutdownCtx)
 		if err != nil {
-			logger.Error(
+			logger.ErrorContext(
+				shutdownCtx,
 				"error shutting down http server",
 				slog.Any("error", err),
 			)

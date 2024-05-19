@@ -1,25 +1,14 @@
-package app
+package log
 
 import (
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/skaisanlahti/message-board/internal/pkg/middleware"
 )
 
-type Middleware func(http.Handler) http.Handler
-
-func newMiddleware(middlewares ...Middleware) Middleware {
-	return func(baseHandler http.Handler) http.Handler {
-		handler := baseHandler
-		for _, middleware := range middlewares {
-			handler = middleware(handler)
-		}
-
-		return handler
-	}
-}
-
-func logRequest(logger *slog.Logger) Middleware {
+func LogRequestInfo(logger *slog.Logger) middleware.Middleware {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 			method := request.Method

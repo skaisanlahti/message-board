@@ -1,0 +1,27 @@
+{{ define "register_page" }}
+    <!doctype html>
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <link rel="stylesheet" href="/static/main.css" />
+            <title>Register</title>
+        </head>
+        <body>
+            <h1>Register</h1>
+            {{ template "register_form" . }}
+            <a href="/login">Login</a>
+
+            <script type="module" src="/static/main.js"></script>
+        </body>
+    </html>
+{{ end }}
+
+{{ define "register_form" }}
+    <form id="register_form" name="{{ .Key }}" hx-post="/register" hx-target="#register_form" hx-swap="outerHTML">
+        <input type="text" name="username" placeholder="Username..." value="{{ .Username }}" />
+        <input type="password" name="password" placeholder="Password..." value="{{ .Password }}" />
+        <button type="submit">Login</button>
+        <p>{{ .Error }}</p>
+    </form>
+{{ end }}

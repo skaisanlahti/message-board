@@ -4,8 +4,6 @@ import (
 	"embed"
 	"html/template"
 	"net/http"
-
-	"github.com/skaisanlahti/message-board/internal/assert"
 )
 
 //go:embed static/*
@@ -21,6 +19,9 @@ func ServeStaticFiles() http.Handler {
 
 func ParseTemplates() *template.Template {
 	templates, err := template.ParseFS(templateFiles, "html/*.html")
-	assert.Ok(err, "failed to parse html templates")
+	if err != nil {
+		panic(err)
+	}
+
 	return templates
 }
