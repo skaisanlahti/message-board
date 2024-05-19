@@ -7,17 +7,17 @@ import (
 )
 
 type LogoutHandler struct {
-	sessionService *session.Service
+	sessionManager *session.Manager
 }
 
-func NewLogoutHandler(sessionService *session.Service) *LogoutHandler {
+func NewLogoutHandler(sessionManager *session.Manager) *LogoutHandler {
 	return &LogoutHandler{
-		sessionService,
+		sessionManager,
 	}
 }
 
 func (handler *LogoutHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	handler.sessionService.Stop(response, request)
+	handler.sessionManager.Stop(response, request)
 	response.Header().Add("HX-Location", "/logout")
 	response.WriteHeader(http.StatusOK)
 }

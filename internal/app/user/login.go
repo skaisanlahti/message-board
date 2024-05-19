@@ -13,26 +13,26 @@ import (
 )
 
 type LoginHandler struct {
-	logger          *slog.Logger
-	database        *sql.DB
-	sessionService  *session.Service
-	passwordService *password.Service
-	webService      *web.Service
+	logger         *slog.Logger
+	database       *sql.DB
+	sessionManager *session.Manager
+	passwordHasher *password.Hasher
+	htmlRenderer   *web.HTMLRenderer
 }
 
 func NewLoginHandler(
 	logger *slog.Logger,
 	database *sql.DB,
-	sessionService *session.Service,
-	passwordService *password.Service,
-	webService *web.Service,
+	sessionManager *session.Manager,
+	passwordHasher *password.Hasher,
+	htmlRenderer *web.HTMLRenderer,
 ) *LoginHandler {
 	return &LoginHandler{
 		logger,
 		database,
-		sessionService,
-		passwordService,
-		webService,
+		sessionManager,
+		passwordHasher,
+		htmlRenderer,
 	}
 }
 
@@ -47,13 +47,13 @@ func (handler *LoginHandler) ServeHTTP(response http.ResponseWriter, request *ht
 		return
 	}
 
-	ok := handler.passwordService.Verify(user.password, password)
+	ok := handler.passwordHasher.Verify(user.password, password)
 	if !ok {
 		handler.handleError(ctx, response, username, password)
 		return
 	}
 
-	handler.sessionService.Start(user.id, response)
+	handler.sessionManager.Start(user.id, response)
 	go handler.checkPasswordOptions(ctx, user, password)
 	response.Header().Add("HX-Location", "/profile")
 	response.WriteHeader(http.StatusOK)
@@ -84,16 +84,16 @@ func (handler *LoginHandler) handleError(ctx context.Context, response http.Resp
 		Password: password,
 		Error:    "invalid credentials",
 	}
-	handler.webService.Render(ctx, response, "login_form", data)
+	handler.htmlRenderer.Render(ctx, response, "login_form", data)
 }
 
 func (handler *LoginHandler) checkPasswordOptions(ctx context.Context, user getUserResult, plainPassword string) {
-	ok := handler.passwordService.CompareOptions(user.password)
+	ok := handler.passwordHasher.CompareOptions(user.password)
 	if ok {
 		return
 	}
 
-	hashedPassword := handler.passwordService.Hash(plainPassword)
+	hashedPassword := handler.passwordHasher.Hash(plainPassword)
 	query := `UPDATE users SET password = $1 WHERE id = $2`
 	_, err := handler.database.ExecContext(ctx, query, hashedPassword, user.id)
 	if err != nil {

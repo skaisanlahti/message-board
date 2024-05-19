@@ -53,37 +53,36 @@ func Run(
 		slog.String("file", *settingsFilePath),
 	)
 
-	templates := web.ParseTemplates()
-	webService := web.NewService(logger, templates)
-
 	database, err := sql.Open("pgx", settings.DatabaseAddress)
 	if err != nil {
 		return err
 	}
 	defer database.Close()
 
-	sessionOptions := session.Options{
+	htmlRenderer := web.NewHTMLRenderer(
+		logger,
+		web.ParseTemplates(),
+	)
+
+	sessionManager := session.NewManager(session.Options{
 		CookieName:      "sid",
 		SessionDuration: 1 * time.Hour,
-	}
+	})
 
-	sessionService := session.NewService(sessionOptions)
-	passwordOptions := password.Options{
+	passwordHasher := password.NewHasher(password.Options{
 		Time:    5,
 		Memory:  1024 * 7,
 		Threads: 1,
 		SaltLen: 32,
 		KeyLen:  64,
-	}
-
-	passwordService := password.NewService(passwordOptions)
+	})
 
 	server := newServer(
 		logger,
 		database,
-		webService,
-		passwordService,
-		sessionService,
+		htmlRenderer,
+		passwordHasher,
+		sessionManager,
 	)
 
 	httpServer := http.Server{

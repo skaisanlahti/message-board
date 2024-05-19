@@ -11,14 +11,14 @@ type homePageData struct {
 }
 
 type HomePageHandler struct {
-	webService *web.Service
+	htmlRenderer *web.HTMLRenderer
 }
 
 func NewHomePageHandler(
-	webService *web.Service,
+	htmlRenderer *web.HTMLRenderer,
 ) *HomePageHandler {
 	return &HomePageHandler{
-		webService,
+		htmlRenderer,
 	}
 }
 
@@ -27,5 +27,5 @@ func (handler *HomePageHandler) ServeHTTP(response http.ResponseWriter, request 
 		Greeting: "Hello world",
 	}
 
-	handler.webService.Render(request.Context(), response, "home_page", data)
+	handler.htmlRenderer.Render(request.Context(), response, "home_page", data)
 }

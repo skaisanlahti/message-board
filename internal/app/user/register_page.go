@@ -15,19 +15,19 @@ type registerPageData struct {
 }
 
 type RegisterPageHandler struct {
-	webService *web.Service
+	htmlRenderer *web.HTMLRenderer
 }
 
 func NewRegisterPageHandler(
-	webService *web.Service,
+	htmlRenderer *web.HTMLRenderer,
 ) *RegisterPageHandler {
 	return &RegisterPageHandler{
-		webService,
+		htmlRenderer,
 	}
 }
 
 func (handler *RegisterPageHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 	data := registerPageData{Key: time.Now().UnixMilli()}
-	handler.webService.Render(ctx, response, "register_page", data)
+	handler.htmlRenderer.Render(ctx, response, "register_page", data)
 }

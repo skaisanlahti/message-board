@@ -16,14 +16,14 @@ type loginPageData struct {
 }
 
 type LoginPageHandler struct {
-	webService *web.Service
+	htmlRenderer *web.HTMLRenderer
 }
 
 func NewLoginPageHandler(
-	webService *web.Service,
+	htmlRenderer *web.HTMLRenderer,
 ) *LoginPageHandler {
 	return &LoginPageHandler{
-		webService,
+		htmlRenderer,
 	}
 }
 
@@ -37,5 +37,5 @@ func (handler *LoginPageHandler) ServeHTTP(response http.ResponseWriter, request
 
 	ctx := request.Context()
 	data := loginPageData{Key: time.Now().UnixMilli()}
-	handler.webService.Render(ctx, response, "login_page", data)
+	handler.htmlRenderer.Render(ctx, response, "login_page", data)
 }

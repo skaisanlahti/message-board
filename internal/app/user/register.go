@@ -13,26 +13,26 @@ import (
 )
 
 type RegisterHandler struct {
-	logger          *slog.Logger
-	database        *sql.DB
-	sessionService  *session.Service
-	passwordService *password.Service
-	webService      *web.Service
+	logger         *slog.Logger
+	database       *sql.DB
+	sessionManager *session.Manager
+	passwordHasher *password.Hasher
+	htmlRenderer   *web.HTMLRenderer
 }
 
 func NewRegisterHandler(
 	logger *slog.Logger,
 	database *sql.DB,
-	sessionService *session.Service,
-	passwordService *password.Service,
-	webService *web.Service,
+	sessionManager *session.Manager,
+	passwordHasher *password.Hasher,
+	htmlRenderer *web.HTMLRenderer,
 ) *RegisterHandler {
 	return &RegisterHandler{
 		logger,
 		database,
-		sessionService,
-		passwordService,
-		webService,
+		sessionManager,
+		passwordHasher,
+		htmlRenderer,
 	}
 }
 
@@ -41,7 +41,7 @@ func (handler *RegisterHandler) ServeHTTP(response http.ResponseWriter, request 
 	plainPassword := request.FormValue("password")
 	ctx := request.Context()
 
-	hashedPassword := handler.passwordService.Hash(plainPassword)
+	hashedPassword := handler.passwordHasher.Hash(plainPassword)
 	userID, err := handler.createUser(ctx, username, hashedPassword)
 	if err != nil {
 		data := registerPageData{
@@ -50,11 +50,11 @@ func (handler *RegisterHandler) ServeHTTP(response http.ResponseWriter, request 
 			Password: plainPassword,
 			Error:    "username already exists",
 		}
-		handler.webService.Render(ctx, response, "register_form", data)
+		handler.htmlRenderer.Render(ctx, response, "register_form", data)
 		return
 	}
 
-	handler.sessionService.Start(userID, response)
+	handler.sessionManager.Start(userID, response)
 	response.Header().Add("HX-Location", "/profile")
 	response.WriteHeader(http.StatusOK)
 }

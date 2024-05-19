@@ -27,18 +27,18 @@ var DefaultOptions = Options{
 	KeyLen:  64,
 }
 
-type Service struct {
+type Hasher struct {
 	options Options
 }
 
-func NewService(options Options) *Service {
-	return &Service{
+func NewHasher(options Options) *Hasher {
+	return &Hasher{
 		options: options,
 	}
 }
 
-func (service *Service) Hash(password string) string {
-	options := service.options
+func (hasher *Hasher) Hash(password string) string {
+	options := hasher.options
 	salt := randomBytes(options.SaltLen)
 	hash := argon2.IDKey(
 		[]byte(password),
@@ -52,7 +52,7 @@ func (service *Service) Hash(password string) string {
 	return encode(hash, salt, options)
 }
 
-func (service *Service) Verify(hashedPassword, candidate string) bool {
+func (hasher *Hasher) Verify(hashedPassword, candidate string) bool {
 	hash, salt, options, ok := decode(hashedPassword)
 	if !ok {
 		return false
@@ -70,13 +70,13 @@ func (service *Service) Verify(hashedPassword, candidate string) bool {
 	return subtle.ConstantTimeCompare(hash, candidateHash) == 1
 }
 
-func (service *Service) CompareOptions(hashedPassword string) bool {
+func (hasher *Hasher) CompareOptions(hashedPassword string) bool {
 	_, _, options, ok := decode(hashedPassword)
 	if !ok {
 		return false
 	}
 
-	return equals(options, service.options)
+	return equals(options, hasher.options)
 }
 
 func encode(hash, salt []byte, options Options) string {

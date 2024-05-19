@@ -18,7 +18,7 @@ var testPasswords = []string{
 }
 
 func TestPassword(t *testing.T) {
-	service := NewService(testOptions)
+	service := NewHasher(testOptions)
 
 	for _, password := range testPasswords {
 		result := service.Hash(password)

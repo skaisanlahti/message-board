@@ -7,18 +7,18 @@ import (
 )
 
 type LogoutPageHandler struct {
-	webService *web.Service
+	htmlRenderer *web.HTMLRenderer
 }
 
 func NewLogoutPageHandler(
-	webService *web.Service,
+	htmlRenderer *web.HTMLRenderer,
 ) *LogoutPageHandler {
 	return &LogoutPageHandler{
-		webService,
+		htmlRenderer,
 	}
 }
 
 func (handler *LogoutPageHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
-	handler.webService.Render(ctx, response, "logout_page", nil)
+	handler.htmlRenderer.Render(ctx, response, "logout_page", nil)
 }

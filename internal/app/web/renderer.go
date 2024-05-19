@@ -7,25 +7,25 @@ import (
 	"net/http"
 )
 
-type Service struct {
+type HTMLRenderer struct {
 	logger    *slog.Logger
 	templates *template.Template
 }
 
-func NewService(
+func NewHTMLRenderer(
 	logger *slog.Logger,
 	templates *template.Template,
-) *Service {
-	return &Service{
+) *HTMLRenderer {
+	return &HTMLRenderer{
 		logger,
 		templates,
 	}
 }
 
-func (service *Service) Render(ctx context.Context, response http.ResponseWriter, template string, data any) {
-	err := service.templates.ExecuteTemplate(response, template, data)
+func (renderer *HTMLRenderer) Render(ctx context.Context, response http.ResponseWriter, template string, data any) {
+	err := renderer.templates.ExecuteTemplate(response, template, data)
 	if err != nil {
-		service.logger.ErrorContext(
+		renderer.logger.ErrorContext(
 			ctx,
 			"failed to render template",
 			slog.String("template", template),

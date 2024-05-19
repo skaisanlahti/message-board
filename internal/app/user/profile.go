@@ -7,18 +7,18 @@ import (
 )
 
 type ProfilePageHandler struct {
-	webService *web.Service
+	htmlRenderer *web.HTMLRenderer
 }
 
 func NewProfilePageHandler(
-	webService *web.Service,
+	htmlRenderer *web.HTMLRenderer,
 ) *ProfilePageHandler {
 	return &ProfilePageHandler{
-		webService,
+		htmlRenderer,
 	}
 }
 
 func (handler *ProfilePageHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
-	handler.webService.Render(ctx, response, "profile_page", nil)
+	handler.htmlRenderer.Render(ctx, response, "profile_page", nil)
 }

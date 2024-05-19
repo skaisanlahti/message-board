@@ -17,9 +17,9 @@ import (
 func newServer(
 	logger *slog.Logger,
 	database *sql.DB,
-	webService *web.Service,
-	passwordService *password.Service,
-	sessionService *session.Service,
+	htmlRenderer *web.HTMLRenderer,
+	passwordHasher *password.Hasher,
+	sessionManager *session.Manager,
 ) http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("GET /static/", web.ServeStaticFiles())
@@ -29,45 +29,45 @@ func newServer(
 	)
 
 	mux.Handle("GET /", home.NewHomePageHandler(
-		webService,
+		htmlRenderer,
 	))
 
 	mux.Handle("GET /register", user.NewRegisterPageHandler(
-		webService,
+		htmlRenderer,
 	))
 	mux.Handle("POST /register", user.NewRegisterHandler(
 		logger,
 		database,
-		sessionService,
-		passwordService,
-		webService,
+		sessionManager,
+		passwordHasher,
+		htmlRenderer,
 	))
 
 	mux.Handle("GET /login", user.NewLoginPageHandler(
-		webService,
+		htmlRenderer,
 	))
 	mux.Handle("POST /login", user.NewLoginHandler(
 		logger,
 		database,
-		sessionService,
-		passwordService,
-		webService,
+		sessionManager,
+		passwordHasher,
+		htmlRenderer,
 	))
 
 	mux.Handle("GET /logout", user.NewLogoutPageHandler(
-		webService,
+		htmlRenderer,
 	))
 	mux.Handle("POST /logout", private(user.NewLogoutHandler(
-		sessionService,
+		sessionManager,
 	)))
 
 	mux.Handle("GET /profile", private(user.NewProfilePageHandler(
-		webService,
+		htmlRenderer,
 	)))
 
 	global := middleware.New(
 		log.LogRequestInfo(logger),
-		session.AddUserToContext(sessionService),
+		session.AddUserToContext(sessionManager),
 	)
 
 	handler := global(mux)

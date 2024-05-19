@@ -87,26 +87,26 @@ func (store *Store) ClearExpired() {
 	}
 }
 
-type Service struct {
+type Manager struct {
 	store   *Store
 	options Options
 }
 
-func NewService(options Options) *Service {
-	return &Service{
+func NewManager(options Options) *Manager {
+	return &Manager{
 		store:   NewStore(),
 		options: options,
 	}
 }
 
-func (service *Service) Start(
+func (manager *Manager) Start(
 	userID int,
 	response http.ResponseWriter,
 ) {
-	session := new(userID, time.Now().Add(service.options.SessionDuration))
-	service.store.Set(session)
+	session := new(userID, time.Now().Add(manager.options.SessionDuration))
+	manager.store.Set(session)
 	cookie := &http.Cookie{
-		Name:     service.options.CookieName,
+		Name:     manager.options.CookieName,
 		Value:    session.SessionID,
 		HttpOnly: true,
 		Expires:  session.Expires,
@@ -118,18 +118,18 @@ func (service *Service) Start(
 	http.SetCookie(response, cookie)
 }
 
-func (service *Service) Stop(
+func (manager *Manager) Stop(
 	response http.ResponseWriter,
 	request *http.Request,
 ) {
-	cookie, err := request.Cookie(service.options.CookieName)
+	cookie, err := request.Cookie(manager.options.CookieName)
 	if err != nil {
 		return
 	}
 
-	service.store.Clear(cookie.Value)
+	manager.store.Clear(cookie.Value)
 	cookie = &http.Cookie{
-		Name:     service.options.CookieName,
+		Name:     manager.options.CookieName,
 		Value:    "",
 		HttpOnly: true,
 		Expires:  time.Now(),
@@ -146,16 +146,16 @@ func GetUserFromContext(request *http.Request) (int, bool) {
 	return userID, ok
 }
 
-func AddUserToContext(service *Service) middleware.Middleware {
+func AddUserToContext(manager *Manager) middleware.Middleware {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-			cookie, err := request.Cookie(service.options.CookieName)
+			cookie, err := request.Cookie(manager.options.CookieName)
 			if err != nil {
 				handler.ServeHTTP(response, request)
 				return
 			}
 
-			session, ok := service.store.Get(cookie.Value)
+			session, ok := manager.store.Get(cookie.Value)
 			if !ok {
 				handler.ServeHTTP(response, request)
 				return
