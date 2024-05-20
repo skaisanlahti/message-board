@@ -1,6 +1,7 @@
 package web
 
 import (
+	"bytes"
 	"context"
 	"html/template"
 	"log/slog"
@@ -23,7 +24,8 @@ func NewHTMLRenderer(
 }
 
 func (renderer *HTMLRenderer) Render(ctx context.Context, response http.ResponseWriter, template string, data any) {
-	err := renderer.templates.ExecuteTemplate(response, template, data)
+	var buffer bytes.Buffer
+	err := renderer.templates.ExecuteTemplate(&buffer, template, data)
 	if err != nil {
 		renderer.logger.ErrorContext(
 			ctx,
@@ -31,5 +33,11 @@ func (renderer *HTMLRenderer) Render(ctx context.Context, response http.Response
 			slog.String("template", template),
 			slog.Any("err", err),
 		)
+		http.Error(response, "rendering failed", http.StatusInternalServerError)
+		return
 	}
+
+	response.Header().Add("Content-type", "text/html; charset=utf-8")
+	response.WriteHeader(http.StatusOK)
+	response.Write(buffer.Bytes())
 }
