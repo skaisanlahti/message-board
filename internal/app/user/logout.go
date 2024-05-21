@@ -3,6 +3,7 @@ package user
 import (
 	"net/http"
 
+	"github.com/skaisanlahti/message-board/internal/pkg/htmx"
 	"github.com/skaisanlahti/message-board/internal/pkg/session"
 )
 
@@ -17,7 +18,6 @@ func NewLogoutHandler(sessionManager *session.Manager) *LogoutHandler {
 }
 
 func (handler *LogoutHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	handler.sessionManager.Stop(response, request)
-	response.Header().Add("HX-Location", "/logout")
-	response.WriteHeader(http.StatusOK)
+	handler.sessionManager.ClearSession(response, request)
+	htmx.Redirect(response, "/logout")
 }

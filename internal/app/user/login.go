@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/skaisanlahti/message-board/internal/app/web"
+	"github.com/skaisanlahti/message-board/internal/pkg/htmx"
 	"github.com/skaisanlahti/message-board/internal/pkg/password"
 	"github.com/skaisanlahti/message-board/internal/pkg/session"
 )
@@ -53,10 +54,13 @@ func (handler *LoginHandler) ServeHTTP(response http.ResponseWriter, request *ht
 		return
 	}
 
-	handler.sessionManager.Start(user.id, response)
-	go handler.checkPasswordOptions(ctx, user, password)
-	response.Header().Add("HX-Location", "/profile")
-	response.WriteHeader(http.StatusOK)
+	ok = handler.passwordHasher.CompareOptions(user.password)
+	if !ok {
+		go handler.rehashPassword(ctx, user, password)
+	}
+
+	handler.sessionManager.StartSession(user.id, response)
+	htmx.Redirect(response, "/profile")
 }
 
 type getUserResult struct {
@@ -87,12 +91,7 @@ func (handler *LoginHandler) handleError(ctx context.Context, response http.Resp
 	handler.htmlRenderer.Render(ctx, response, "login_form", data)
 }
 
-func (handler *LoginHandler) checkPasswordOptions(ctx context.Context, user getUserResult, plainPassword string) {
-	ok := handler.passwordHasher.CompareOptions(user.password)
-	if ok {
-		return
-	}
-
+func (handler *LoginHandler) rehashPassword(ctx context.Context, user getUserResult, plainPassword string) {
 	hashedPassword := handler.passwordHasher.Hash(plainPassword)
 	query := `UPDATE users SET password = $1 WHERE id = $2`
 	_, err := handler.database.ExecContext(ctx, query, hashedPassword, user.id)

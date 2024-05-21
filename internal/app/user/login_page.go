@@ -28,7 +28,7 @@ func NewLoginPageHandler(
 }
 
 func (handler *LoginPageHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	_, ok := session.GetUserFromContext(request)
+	_, ok := session.User(request)
 	if ok {
 		response.Header().Add("HX-Location", "/profile")
 		response.WriteHeader(http.StatusOK)

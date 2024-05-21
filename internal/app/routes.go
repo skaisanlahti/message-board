@@ -21,55 +21,59 @@ func newServer(
 	passwordHasher *password.Hasher,
 	sessionManager *session.Manager,
 ) http.Handler {
-	mux := http.NewServeMux()
-	mux.Handle("GET /static/", web.ServeStaticFiles())
+	router := http.NewServeMux()
+	router.Handle("GET /static/", web.ServeStaticFiles())
 
 	private := middleware.New(
-		session.RequireUser(),
+		session.Require(true, http.RedirectHandler("/login", http.StatusSeeOther)),
 	)
 
-	mux.Handle("GET /", home.NewHomePageHandler(
+	public := middleware.New(
+		session.Require(false, http.NotFoundHandler()),
+	)
+
+	router.Handle("GET /", home.NewHomePageHandler(
 		htmlRenderer,
 	))
 
-	mux.Handle("GET /register", user.NewRegisterPageHandler(
+	router.Handle("GET /register", public(user.NewRegisterPageHandler(
 		htmlRenderer,
-	))
-	mux.Handle("POST /register", user.NewRegisterHandler(
+	)))
+	router.Handle("POST /register", public(user.NewRegisterHandler(
 		logger,
 		database,
 		sessionManager,
 		passwordHasher,
 		htmlRenderer,
-	))
+	)))
 
-	mux.Handle("GET /login", user.NewLoginPageHandler(
+	router.Handle("GET /login", public(user.NewLoginPageHandler(
 		htmlRenderer,
-	))
-	mux.Handle("POST /login", user.NewLoginHandler(
+	)))
+	router.Handle("POST /login", public(user.NewLoginHandler(
 		logger,
 		database,
 		sessionManager,
 		passwordHasher,
 		htmlRenderer,
-	))
+	)))
 
-	mux.Handle("GET /logout", user.NewLogoutPageHandler(
+	router.Handle("GET /logout", public(user.NewLogoutPageHandler(
 		htmlRenderer,
-	))
-	mux.Handle("POST /logout", private(user.NewLogoutHandler(
+	)))
+	router.Handle("POST /logout", private(user.NewLogoutHandler(
 		sessionManager,
 	)))
 
-	mux.Handle("GET /profile", private(user.NewProfilePageHandler(
+	router.Handle("GET /profile", private(user.NewProfilePageHandler(
 		htmlRenderer,
 	)))
 
 	global := middleware.New(
 		log.LogRequestInfo(logger),
-		session.AddUserToContext(sessionManager),
+		session.Middleware(sessionManager),
 	)
 
-	handler := global(mux)
+	handler := global(router)
 	return handler
 }

@@ -22,7 +22,7 @@ type Session struct {
 	Expires   time.Time
 }
 
-func new(userID int, expires time.Time) Session {
+func newSession(userID int, expires time.Time) Session {
 	sessionID := uuid.New().String()
 	sessionID = base64.URLEncoding.EncodeToString([]byte(sessionID))
 	session := Session{
@@ -99,11 +99,12 @@ func NewManager(options Options) *Manager {
 	}
 }
 
-func (manager *Manager) Start(
+func (manager *Manager) StartSession(
 	userID int,
 	response http.ResponseWriter,
 ) {
-	session := new(userID, time.Now().Add(manager.options.SessionDuration))
+	expires := time.Now().Add(manager.options.SessionDuration)
+	session := newSession(userID, expires)
 	manager.store.Set(session)
 	cookie := &http.Cookie{
 		Name:     manager.options.CookieName,
@@ -118,7 +119,7 @@ func (manager *Manager) Start(
 	http.SetCookie(response, cookie)
 }
 
-func (manager *Manager) Stop(
+func (manager *Manager) ClearSession(
 	response http.ResponseWriter,
 	request *http.Request,
 ) {
@@ -141,12 +142,12 @@ func (manager *Manager) Stop(
 	http.SetCookie(response, cookie)
 }
 
-func GetUserFromContext(request *http.Request) (int, bool) {
+func User(request *http.Request) (int, bool) {
 	userID, ok := request.Context().Value("userID").(int)
 	return userID, ok
 }
 
-func AddUserToContext(manager *Manager) middleware.Middleware {
+func Middleware(manager *Manager) middleware.Middleware {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 			cookie, err := request.Cookie(manager.options.CookieName)
@@ -172,12 +173,12 @@ func AddUserToContext(manager *Manager) middleware.Middleware {
 	}
 }
 
-func RequireUser() middleware.Middleware {
+func Require(flag bool, exceptionHandler http.Handler) middleware.Middleware {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-			_, ok := GetUserFromContext(request)
-			if !ok {
-				response.WriteHeader(http.StatusUnauthorized)
+			_, ok := User(request)
+			if ok != flag {
+				exceptionHandler.ServeHTTP(response, request)
 				return
 			}
 

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/skaisanlahti/message-board/internal/app/web"
+	"github.com/skaisanlahti/message-board/internal/pkg/htmx"
 	"github.com/skaisanlahti/message-board/internal/pkg/password"
 	"github.com/skaisanlahti/message-board/internal/pkg/session"
 )
@@ -54,9 +55,8 @@ func (handler *RegisterHandler) ServeHTTP(response http.ResponseWriter, request 
 		return
 	}
 
-	handler.sessionManager.Start(userID, response)
-	response.Header().Add("HX-Location", "/profile")
-	response.WriteHeader(http.StatusOK)
+	handler.sessionManager.StartSession(userID, response)
+	htmx.Redirect(response, "/profile")
 }
 
 func (handler *RegisterHandler) createUser(ctx context.Context, username, password string) (int, error) {
