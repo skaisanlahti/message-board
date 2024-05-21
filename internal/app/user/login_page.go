@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/skaisanlahti/message-board/internal/app/web"
-	"github.com/skaisanlahti/message-board/internal/pkg/session"
 )
 
 type loginPageData struct {
@@ -28,13 +27,6 @@ func NewLoginPageHandler(
 }
 
 func (handler *LoginPageHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	_, ok := session.User(request)
-	if ok {
-		response.Header().Add("HX-Location", "/profile")
-		response.WriteHeader(http.StatusOK)
-		return
-	}
-
 	ctx := request.Context()
 	data := loginPageData{Key: time.Now().UnixMilli()}
 	handler.htmlRenderer.Render(ctx, response, "login_page", data)
