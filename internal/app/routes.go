@@ -14,7 +14,7 @@ import (
 	"github.com/skaisanlahti/message-board/internal/pkg/session"
 )
 
-func newServer(
+func newRouter(
 	logger *slog.Logger,
 	database *sql.DB,
 	htmlRenderer *web.HTMLRenderer,

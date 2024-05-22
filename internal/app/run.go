@@ -77,7 +77,7 @@ func Run(
 		KeyLen:  64,
 	})
 
-	server := newServer(
+	router := newRouter(
 		logger,
 		database,
 		htmlRenderer,
@@ -87,7 +87,7 @@ func Run(
 
 	httpServer := http.Server{
 		Addr:    settings.ServerAddress,
-		Handler: server,
+		Handler: router,
 	}
 
 	go func() {
