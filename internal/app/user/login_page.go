@@ -27,7 +27,6 @@ func NewLoginPageHandler(
 }
 
 func (handler *LoginPageHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	ctx := request.Context()
 	data := loginPageData{Key: time.Now().UnixMilli()}
-	handler.htmlRenderer.Render(ctx, response, "login_page", data)
+	handler.htmlRenderer.Render(response, "login_page", data)
 }

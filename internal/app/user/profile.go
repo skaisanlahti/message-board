@@ -19,6 +19,5 @@ func NewProfilePageHandler(
 }
 
 func (handler *ProfilePageHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	ctx := request.Context()
-	handler.htmlRenderer.Render(ctx, response, "profile_page", nil)
+	handler.htmlRenderer.Render(response, "profile_page", nil)
 }

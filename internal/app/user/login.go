@@ -88,7 +88,7 @@ func (handler *LoginHandler) handleError(ctx context.Context, response http.Resp
 		Password: password,
 		Error:    "invalid credentials",
 	}
-	handler.htmlRenderer.Render(ctx, response, "login_form", data)
+	handler.htmlRenderer.Render(response, "login_form", data)
 }
 
 func (handler *LoginHandler) rehashPassword(ctx context.Context, user getUserResult, plainPassword string) {

@@ -27,5 +27,5 @@ func (handler *HomePageHandler) ServeHTTP(response http.ResponseWriter, request 
 		Greeting: "Hello world",
 	}
 
-	handler.htmlRenderer.Render(request.Context(), response, "home_page", data)
+	handler.htmlRenderer.Render(response, "home_page", data)
 }

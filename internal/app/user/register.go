@@ -38,9 +38,9 @@ func NewRegisterHandler(
 }
 
 func (handler *RegisterHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
 	username := request.FormValue("username")
 	plainPassword := request.FormValue("password")
-	ctx := request.Context()
 
 	hashedPassword := handler.passwordHasher.Hash(plainPassword)
 	userID, err := handler.createUser(ctx, username, hashedPassword)
@@ -51,7 +51,7 @@ func (handler *RegisterHandler) ServeHTTP(response http.ResponseWriter, request 
 			Password: plainPassword,
 			Error:    "username already exists",
 		}
-		handler.htmlRenderer.Render(ctx, response, "register_form", data)
+		handler.htmlRenderer.Render(response, "register_form", data)
 		return
 	}
 

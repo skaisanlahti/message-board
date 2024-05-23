@@ -27,7 +27,6 @@ func NewRegisterPageHandler(
 }
 
 func (handler *RegisterPageHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	ctx := request.Context()
 	data := registerPageData{Key: time.Now().UnixMilli()}
-	handler.htmlRenderer.Render(ctx, response, "register_page", data)
+	handler.htmlRenderer.Render(response, "register_page", data)
 }

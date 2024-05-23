@@ -19,6 +19,5 @@ func NewLogoutPageHandler(
 }
 
 func (handler *LogoutPageHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
-	ctx := request.Context()
-	handler.htmlRenderer.Render(ctx, response, "logout_page", nil)
+	handler.htmlRenderer.Render(response, "logout_page", nil)
 }
